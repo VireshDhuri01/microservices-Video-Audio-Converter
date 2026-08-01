@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+    environment{
+        AWS_REGION = "us-east-1"
+    }
+    stages{
+        stage('Checkout from Git') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')])
+                {
+                git branch: 'main', url: 'https://github.com/VireshDhuri01/microservices-Video-Audio-Converter.git'
+                sh "git pull --rebase https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/VireshDhuri01/microservices-Video-Audio-Converter.git main"
+                }
+            }
+        }
+        stage('Auth-Service Image Build') {
+            steps {
+                dir('src/auth-service'){
+                    sh "docker build -t authservice ."
+                }
+            }
+        }
+        stage('Converter-Service Image Build') {
+            steps {
+                dir('src/converter-service'){
+                    sh "docker build -t converterservice ."
+                }
+            }
+        }
+        stage('Gateway-Service Image Build') {
+            steps {
+                dir('src/gateway-service'){
+                    sh "docker build -t gatewayservice ."
+                }
+            }
+        }
+        stage('Notification-Service Image Build') {
+            steps {
+                dir('src/notification-service'){
+                    sh "docker build -t notificationservice ."
+                }
+            }
+        }
+        stage('Create Respective Repo in ECR') {
+            steps {
+                withCredentials([string(credentialsId: 'access-key', variable: 'AWS_ACCESS_KEY'),
+                    string(credentialsId: 'secret-key', variable: 'AWS_SECRET_KEY')])
+                {
+                    sh """
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY
+                aws configure set aws_secret_access_key $AWS_SECRET_KEY
+                """
+                    sh '''
+                    REPOS="authservice gatewayservice converterservice notificationservice"
+                    for REPO in $REPOS
+                    do
+                        aws ecr describe-repositories \
+                            --repository-names $REPO \
+                            --region ${AWS_REGION} >/dev/null 2>&1 || \
+                        aws ecr create-repository \
+                            --repository-name $REPO \
+                            --region ${AWS_REGION}
+
+                        echo "$REPO is ready."
+                    done
+                    '''
+                }
+            }
+        }
+        stage('Image Tag, Push & Cleanup') {
+            steps {
+                withCredentials([string(credentialsId: 'access-key', variable: 'AWS_ACCESS_KEY'), 
+                string(credentialsId: 'secret-key', variable: 'AWS_SECRET_KEY')])
+                {
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                    sh """
+                    REPOS="authservice gatewayservice converterservice notificationservice"
+                    for REPO in \$REPOS
+                    do
+                        docker tag \$REPO ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}
+                        docker push ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}
+                        echo "\$REPO image tagged and pushed"
+                    done
+                    """
+                    sh '''
+                    docker rmi -f $(docker images -q) || true
+                    '''
+                }
+            }
+        }
+        stage('Update Manifest files') {
+            steps {
+                sh """
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/auth-service/manifest/auth-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/converter-service/manifest/converter-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/gateway-service/manifest/gateway-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/notification-service/manifest/notification-deploy.yaml
+                """
+            }
+        }
+        stage('Push Manifest to GitHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) 
+                    {sh """
+                git config user.name "Viresh Dhuri"
+                git config user.email "vireshdhuri28@gmail.com"
+                git add .
+                git commit -m "Update image to build ${BUILD_NUMBER}" || true
+                git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/VireshDhuri01/microservices-Video-Audio-Converter.git HEAD:main
+                """}
+            }
+        }
+    }
+}

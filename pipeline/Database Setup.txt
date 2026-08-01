@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+    environment{
+        CLUSTER_NAME = "microservices"
+        AWS_REGION = "us-east-1"
+    }
+    stages {
+        stage('Clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                withCredentials([
+                usernamePassword(credentialsId: 'github-creds',
+                usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')])
+                {
+                git branch: 'main', url: 'https://github.com/VireshDhuri01/microservices-Video-Audio-Converter.git'
+                sh "git pull --rebase https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/VireshDhuri01/microservices-Video-Audio-Converter.git main"
+                }
+            }
+        }
+        stage('AWS configure') {
+            steps {
+                withCredentials([string(credentialsId: 'access-key', variable: 'AWS_ACCESS_KEY'),
+                                 string(credentialsId: 'secret-key', variable: 'AWS_SECRET_KEY')])
+                    { sh """
+                    aws configure set aws_access_key_id $AWS_ACCESS_KEY
+                    aws configure set aws_secret_access_key $AWS_SECRET_KEY
+                    """
+                }
+            }
+        }
+        stage('Update Kubeconfig'){
+            steps{
+                sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
+                sh "kubectl get ns"
+            }
+        }
+        stage('MongoDB-Deploy') {
+            steps {
+                dir('Helm_charts/MongoDB'){
+                    sh "helm install mongo ."
+                }
+            }
+        }
+        stage('Postgres-Deploy') {
+            steps {
+                dir('Helm_charts/Postgres'){
+                    sh "helm install postgres ."
+                    sh "kubectl rollout status deployment/postgres-deploy --timeout=300s"
+                }
+            }
+        }
+        stage('Postgres-Copy init.sql into pod'){
+            steps{
+                dir('Helm_charts/Postgres'){
+                    sh '''
+                        POD=$(kubectl get pod -l app=auth-app -o jsonpath="{.items[0].metadata.name}")
+                        kubectl cp init.sql $POD:/tmp/init.sql
+                        '''
+                }
+            }
+        }
+        stage('Postgres-Initialize init.sql'){
+            steps{
+                withCredentials([
+                    usernamePassword(credentialsId: 'POSTGRES_CREDS', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASS')])
+                    {
+                    sh '''
+                    POD=$(kubectl get pod -l app=auth-app -o jsonpath="{.items[0].metadata.name}")
+                    
+                    kubectl exec $POD -- \
+                    env PGPASSWORD=$DB_PASS \
+                    psql \
+                    -U $DB_USER \
+                    -d authdb \
+                    -f /tmp/init.sql
+                    '''
+                }
+            }
+        }
+        stage('RabbitMQ-Deploy') {
+            steps {
+                dir('Helm_charts/RabbitMQ'){
+                    sh "helm install rabbit ."
+                }
+            }
+        }
+    }
+}
