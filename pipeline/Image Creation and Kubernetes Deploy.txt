@@ -92,10 +92,10 @@ pipeline {
         stage('Update Manifest files') {
             steps {
                 sh """
-                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/auth-service/manifest/auth-deploy.yaml
-                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/converter-service/manifest/converter-deploy.yaml
-                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/gateway-service/manifest/gateway-deploy.yaml
-                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/\$REPO:${BUILD_NUMBER}|" src/notification-service/manifest/notification-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/authservice:${BUILD_NUMBER}|" src/auth-service/manifest/auth-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gatewayservice:${BUILD_NUMBER}|" src/converter-service/manifest/converter-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/converterservice:${BUILD_NUMBER}|" src/gateway-service/manifest/gateway-deploy.yaml
+                sed -i "s|image: .*|image: ${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/notificationservice:${BUILD_NUMBER}|" src/notification-service/manifest/notification-deploy.yaml
                 """
             }
         }
