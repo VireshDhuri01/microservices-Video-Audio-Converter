@@ -1,0 +1,89 @@
+pipeline{
+    agent any
+    environment{
+        CLUSTER_NAME = "microservices"
+        AWS_REGION = "us-east-1"
+    }
+    stages{
+        stage('Clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage ('Git clone') {
+            steps {
+                withCredentials([
+                usernamePassword(credentialsId: 'github-creds',
+                usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')])
+                {
+                git branch: 'main', url: 'https://github.com/VireshDhuri01/microservices-Video-Audio-Converter.git'
+                sh "git pull --rebase https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/VireshDhuri01/microservices-Video-Audio-Converter.git main"
+                }
+            }
+        }
+        stage('AWS configure') {
+            steps {
+                withCredentials([string(credentialsId: 'access-key', variable: 'AWS_ACCESS_KEY'),
+                                 string(credentialsId: 'secret-key', variable: 'AWS_SECRET_KEY')])
+                    { sh """
+                    aws configure set aws_access_key_id $AWS_ACCESS_KEY
+                    aws configure set aws_secret_access_key $AWS_SECRET_KEY
+                    """
+                    sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
+                    sh "kubectl get pods"
+                }
+            }
+        }
+        stage('Login & Get JWT') {
+            steps {
+                dir ('assets') {
+                    withCredentials([usernamePassword(credentialsId: 'LOGINS',
+                usernameVariable: 'EMAIL',passwordVariable: 'PASSWORD')])
+                {
+                sh '''
+                    TOKEN=$(curl -s -X POST http://$NODE_IP:30002/login -u "$EMAIL:$PASSWORD")
+
+                    echo "$TOKEN" > token.txt
+                    '''
+                    }
+                }
+            }
+        }
+        stage('Upload mp4') {
+            steps {
+                dir ('assets'){
+                    sh """
+                    TOKEN=\$(cat token.txt)
+                    curl -X POST -F "file=@./${params.VIDEO_NAME}" -H "Authorization: Bearer \$TOKEN" http://\$NODE_IP:30002/upload
+                    
+                    echo "Waiting for conversion..."
+                    sleep 20
+                    """
+                }
+            }
+        }
+        stage('Wait for FID - Check Mail') {
+            steps {
+                script {
+                    env.FID = input(
+                    message: 'Enter the F-ID received in email',
+                    parameters: [
+                        string( name: 'FID',
+                            defaultValue: '',
+                            description: 'Paste the F-ID')])
+                }
+            }
+        }
+        stage('Download mp3') {
+            steps {
+                dir('assets') {
+                    sh """
+                    TOKEN=\$(cat token.txt)
+
+                    curl --output ${params.AUDIO_NAME}.mp3 -X GET -H "Authorization: Bearer \$TOKEN" "http://\$NODE_IP:30002/download?fid=$FID"
+                    """
+                } 
+            }
+        }
+    }
+}
