@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/authservice:3
+          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/authservice:4
           ports:
             - containerPort: 5000
           envFrom:
