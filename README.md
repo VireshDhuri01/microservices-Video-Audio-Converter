@@ -207,6 +207,8 @@ This pipeline automates the build, containerization, and deployment of all appli
 - Updates the Kubernetes deployment manifests with the latest image tags.
 - Commits and pushes the updated manifest files to GitHub. (Put your mail id)
 
+***Once the updated manifests are pushed, Argo CD automatically detects the changes, synchronizes the Kubernetes cluster, and deploys the latest application version to Amazon EKS.***
+
 ### Notification Configuration
 
 
@@ -228,39 +230,28 @@ For configuring email notifications and two-factor authentication (2FA), follow 
 
 8. Paste this generated password in `notification-service/manifest/secret.yaml` along with your email.
 
+### Pipeline 3 - End-to-End Application Testing
 
-Run the application through the following API calls:
+This pipeline automates the complete workflow of the Video-to-Audio Converter application by interacting with its REST APIs.
 
-# API Definition
+**Pipeline Flow:**
 
-- **Login Endpoint**
-  ```http request
-  POST http://nodeIP:30002/login
-  ```
+- Cleans the Jenkins workspace.
+- Clones the latest source code from GitHub.
+- Configures AWS CLI and connects to the Amazon EKS cluster.
+- Authenticates with the application and retrieves a JWT token.
+- Uploads an MP4 video using the Upload API.
+- Waits for the video conversion process to complete.
+- Pauses the pipeline and prompts the user to enter the generated F-ID received via email.
+- Downloads the converted MP3 file using the Download API and the provided F-ID.
 
-  ```console
-  curl -X POST http://nodeIP:30002/login -u <email>:<password>
-  ``` 
-  Expected output: success!
+***This pipeline validates the complete application flow by automating authentication, video upload, asynchronous conversion, email notification, and MP3 download, ensuring that all microservices work together successfully.***
 
-- **Upload Endpoint**
-  ```http request
-  POST http://nodeIP:30002/upload
-  ```
-
-  ```console
-   curl -X POST -F 'file=@./video.mp4' -H 'Authorization: Bearer <JWT Token>' http://nodeIP:30002/upload
-  ``` 
-  
-  Check if you received the ID on your email.
-
-- **Download Endpoint**
-  ```http request
-  GET http://nodeIP:30002/download?fid=<Generated file identifier>
-  ```
-  ```console
-   curl --output video.mp3 -X GET -H 'Authorization: Bearer <JWT Token>' "http://nodeIP:30002/download?fid=<Generated fid>"
-  ``` 
+**We can Upload mp4 directly on Github and Run the pipeline again.
+Or We can add from Windows. Run this on Windows CLI
+```
+scp -i "C:/Users/Viresh/Downloads/yourkey.pem" "D:/Files from ec2/install.sh" ubuntu@’ip-address’:/home/ubuntu/
+```
 
 ## Destroying the Infrastructure
 
