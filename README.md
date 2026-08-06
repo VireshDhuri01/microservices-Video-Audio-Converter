@@ -110,7 +110,7 @@ Follow these steps to deploy your microservice application:
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
 <p align="center">
-  <img src="./Project documentation/inbound_rules_sg.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
+  <img src="./Project documentation/inbound_rules_sg_.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
   </p>
 
 #### Enable EBS CSI Addon
