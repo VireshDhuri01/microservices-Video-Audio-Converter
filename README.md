@@ -15,19 +15,13 @@ This project is a cloud-native Video-to-Audio Converter application built using 
 
 ### Prerequisites
 
-Before you begin, ensure that the following prerequisites are met:
+Before setting up the project, ensure the following tools are installed and configured:
 
-1. **Create an AWS Account:** If you do not have an AWS account, create one by following the steps [here](https://docs.aws.amazon.com/streams/latest/dev/setting-up.html).
-
-2. **Install Helm:** Helm is a Kubernetes package manager. Install Helm by following the instructions provided [here](https://helm.sh/docs/intro/install/).
-
-3. **Python:** Ensure that Python is installed on your system. You can download it from the [official Python website](https://www.python.org/downloads/).
-
-4. **AWS CLI:** Install the AWS Command Line Interface (CLI) following the official [installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-
-5. **Install kubectl:** Install the latest stable version of `kubectl` on your system. You can find installation instructions [here](https://kubernetes.io/docs/tasks/tools/).
-
-6. **Databases:** Set up PostgreSQL and MongoDB for your application.
+**Docker**
+**Jenkins**
+**Helm**
+**kubectl**
+**AWS CLI**
 
 ### High Level Flow of Application Deployment
 
@@ -60,9 +54,7 @@ Follow these steps to deploy your microservice application:
 1. **Log in to AWS Console:**
    - Access the AWS Management Console with your AWS account credentials.
 
-2. **Create eksCluster IAM Role**
-   - Follow the steps mentioned in [this](https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html) documentation using root user
-   - After creating it will look like this:
+2. **EKS Cluster IAM Role**
 
    <p align="center">
   <img src="./Project documentation/ekscluster_role.png" width="600" title="ekscluster_role" alt="ekscluster_role">
@@ -71,10 +63,7 @@ Follow these steps to deploy your microservice application:
    - Please attach `AmazonEKS_CNI_Policy` explicitly if it is not attached by default
 
 3. **Create Node Role - AmazonEKSNodeRole**
-   - Follow the steps mentioned in [this](https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html#create-worker-node-role) documentation using root user
-   - Please note that you do NOT need to configure any VPC CNI policy mentioned after step 5.e under Creating the Amazon EKS node IAM role
-   - Simply attach the following policies to your role once you have created `AmazonEKS_CNI_Policy` , `AmazonEBSCSIDriverPolicy` , `AmazonEC2ContainerRegistryReadOnly`
-     incase it is not attached by default
+4. 
    - Your AmazonEKSNodeRole will look like this: 
 
 <p align="center">
@@ -91,19 +80,9 @@ Follow these steps to deploy your microservice application:
    - Choose the `eksCluster` IAM role that was created above
    - Review and create the cluster.
 
-6. **Cluster Creation:**
-   - Wait for the cluster to provision, which may take several minutes.
-
-7. **Cluster Ready:**
-   - Once the cluster status shows as "Active," you can now create node groups.
-
 #### Node Group Creation
 
-1. In the "Compute" section, click on "Add node group."
-
-2. Choose the AMI (default), instance type (e.g., t3.medium), and the number of nodes (attach a screenshot here).
-
-3. Click "Create node group."
+Add Nodes as per needed (recommended one c7i-flex.large). Added the SG stated below  
 
 #### Adding inbound rules in Security Group of Nodes
 
@@ -111,13 +90,6 @@ Follow these steps to deploy your microservice application:
 
 <p align="center">
   <img src="./Project documentation/inbound_rules_sg_.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
-  </p>
-
-#### Enable EBS CSI Addon
-1. enable addon `ebs csi` this is for enabling pvcs once cluster is created
-
-<p align="center">
-  <img src="./Project documentation/ebs_addon.png" width="600" title="ebs_addon" alt="ebs_addon">
   </p>
 
 #### Deploying your application on EKS Cluster
@@ -128,90 +100,114 @@ Follow these steps to deploy your microservice application:
    ```
    aws eks update-kubeconfig --name <cluster_name> --region <aws_region>
    ```
+3. Just to verify the cluster further for debugging and troubleshooting. Rest of the main flow will be handled by Jenkins Pipeline.
 
-### Commands
+### Argo CD Setup
 
-Here are some essential Kubernetes commands for managing your deployment:
-
-
-### MongoDB
-
-To install MongoDB, set the database username and password in `values.yaml`, then navigate to the MongoDB Helm chart folder and run:
-
+**On CLI, run these step by step to setup the Argo CD**
 ```
-cd Helm_charts/MongoDB
-helm install mongo .
+kubectl create namespace argocd
+helm repo add argo-cd https://argoproj.github.io/argo-helm
+helm repo update
+helm install argocd argo-cd/argo-cd --namespace argocd --set server.service.type=LoadBalancer
 ```
 
-Connect to the MongoDB instance using:
-
+Also check on CLI - Make sure Argo pods are running
 ```
-mongosh mongodb://<username>:<pwd>@<nodeip>:30005/mp3s?authSource=admin
+kubectl get pods -n argo cd
 ```
+If Argo CD application fails. Check Argocd Pods and services are running safely.  
 
-### PostgreSQL
-
-Set the database username and password in `values.yaml`. Install PostgreSQL from the PostgreSQL Helm chart folder and initialize it with the queries in `init.sql`. For PowerShell users:
-
+**Wait for 2-3 minuties, Check in Loadbalancer, ensure Argo CD Loadbalancer is UP.**
 ```
-cd ..
-cd Postgres
-helm install postgres .
+export ARGOCD_SERVER=$(kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname')
+echo "Argo CD URL: https://$ARGOCD_SERVER"
+
+export ARGOCD_PWD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+echo "Argo CD admin password: $ARGOCD_PWD"
 ```
+**Open the Link for Argo CD -  Username (admin), Password (check output)**
 
-Connect to the Postgres database and copy all the queries from the "init.sql" file.
-```
-psql 'postgres://<username>:<pwd>@<nodeip>:30003/authdb'
-```
-
-### RabbitMQ
-
-Deploy RabbitMQ by running:
-
-```
-helm install rabbitmq .
-```
-
-Ensure you have created two queues in RabbitMQ named `mp3` and `video`. To create queues, visit `<nodeIp>:30004>` and use default username `guest` and password `guest`
-
-**NOTE:** Ensure that all the necessary ports are open in the node security group.
-
-### Apply the manifest file for each microservice:
-
-- **Auth Service:**
-  ```
-  cd auth-service/manifest
-  kubectl apply -f .
-  ```
-
-- **Gateway Service:**
-  ```
-  cd gateway-service/manifest
-  kubectl apply -f .
-  ```
-
-- **Converter Service:**
-  ```
-  cd converter-service/manifest
-  kubectl apply -f .
-  ```
-
-- **Notification Service:**
-  ```
-  cd notification-service/manifest
-  kubectl apply -f .
-  ```
-
-### Application Validation
-
-After deploying the microservices, verify the status of all components by running:
-
+1. Connect the Repo First
+2. Create 4 applications respectively.
+3. Ensure all of them are up and running
+4. Also on CLI, ensure everything is up for all 4 applications. 
 ```
 kubectl get all
 ```
 
-### Notification Configuration
+### Jenkins Setup
 
+***Here are some essential Jekins Credentials for managing your deployment:***
+
+1. **Github credentials (Username and PAT)**
+2. **AWS Credentials (Acces Key and Secret Key)**
+3. **Postgres Credentials (User and Password)**
+   - First add your own in - Helm_charts/Postgres/values.yaml
+   - Then same in Jenkins Creds
+4. **Email ID and Password (Check your init.sql)**
+
+***Add Plugin - Pipeline stage view***
+
+Once Done with these. Run the Pipelines. 
+
+### Pipeline 1 - Database Setup
+
+To install MongoDB, set the database username and password in `values.yaml`, then navigate to the MongoDB Helm chart folder and run:
+
+This pipeline automates the deployment of the application's backend infrastructure on the Kubernetes cluster.
+
+**Pipeline Flow:**
+
+- Cleans the Jenkins workspace.
+- Clones the latest source code from GitHub.
+- Configures AWS CLI using Jenkins credentials.
+- Updates the Kubernetes configuration for the Amazon EKS cluster.
+- Deploys MongoDB using Helm.
+- Deploys PostgreSQL using Helm.
+- Copies the init.sql file into the PostgreSQL pod.
+- Initializes the PostgreSQL database by executing the SQL script.
+- Deploys RabbitMQ using Helm.
+
+Try to Connect to the MongoDB, Postgres instance using:
+
+```
+mongosh mongodb://<username>:<pwd>@<nodeip>:30005/mp3s?authSource=admin
+```
+```
+psql 'postgres://<username>:<pwd>@<nodeip>:30003/authdb'
+```
+
+Ensure you have created two queues in RabbitMQ named `mp3` and `video`. To create queues, visit `<nodeIp>:30004>` and use default username `guest` and password `guest`
+
+Also check on CLI - Make sure Database pods are running
+```
+kubectl get all
+```
+
+**NOTE:** Ensure that all the necessary ports are open in the node security group.
+
+### Pipeline 2 – CI/CD & GitOps Deployment
+
+This pipeline automates the build, containerization, and deployment of all application microservices using Docker, Amazon ECR, GitHub, and Argo CD.
+
+**Pipeline Flow:**
+
+- Clones the latest source code from GitHub.
+- Builds Docker images for all four microservices:
+  ```
+  Auth Service
+  Converter Service
+  Gateway Service
+  Notification Service
+  ```
+- Creates Amazon ECR repositories automatically if they do not already exist. (Add ACCOUNT_ID parameter to the pipeline)
+- Tags and pushes all Docker images to their respective ECR repositories.
+- Cleans up local Docker images on the Jenkins server.
+- Updates the Kubernetes deployment manifests with the latest image tags.
+- Commits and pushes the updated manifest files to GitHub. (Put your mail id)
+
+### Notification Configuration
 
 
 For configuring email notifications and two-factor authentication (2FA), follow these steps:
@@ -231,6 +227,7 @@ For configuring email notifications and two-factor authentication (2FA), follow 
 7. Click on "Generate" and copy the generated password.
 
 8. Paste this generated password in `notification-service/manifest/secret.yaml` along with your email.
+
 
 Run the application through the following API calls:
 
