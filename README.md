@@ -11,7 +11,7 @@ Converting mp4 videos to mp3 in a microservices architecture.
 
 ### Introduction
 
-This project is a cloud-native Video-to-Audio Converter application built using a microservices architecture and deployed on Amazon EKS. Microservices : `auth-server`, `converter-module`, `database-server` (PostgreSQL and MongoDB), and `notification-server`. It demonstrates an end-to-end DevOps workflow, including CI/CD with Jenkins, GitOps using Argo CD, containerization with Docker, image management through Amazon ECR, and monitoring with Prometheus and Grafana.
+This project is a cloud-native Video-to-Audio Converter application built using a microservices architecture and deployed on Amazon EKS. Microservices : `auth-server`, `converter-module`, `database-server` (PostgreSQL and MongoDB), and `notification-server`. It demonstrates an end-to-end DevOps workflow, including CI/CD with Jenkins, GitOps using Argo CD, containerization with Docker, image management through Amazon ECR
 
 ### Prerequisites
 
