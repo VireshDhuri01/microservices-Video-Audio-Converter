@@ -37,54 +37,8 @@ Follow these steps to deploy your microservice application:
    - **auth-server:** Navigate to the `auth-server` manifest folder and apply the configuration.
    - **gateway-server:** Deploy the `gateway-server`.
    - **converter-module:** Deploy the `converter-module`. Make sure to provide your email and password in `converter/manifest/secret.yaml`.
-   - **notification-server:** Configure email for notifications and two-factor authentication (2FA).
+   - **notification-server:** Configure email for notifications and two-factor authentication (2FA)
 
-5. **Application Validation:** Verify the status of all components by running:
-   ```bash
-   kubectl get all
-   ```
-
-6. **Destroying the Infrastructure** 
-
-
-### Low Level Steps
-
-#### Cluster Creation
-
-1. **Log in to AWS Console:**
-   - Access the AWS Management Console with your AWS account credentials.
-
-2. **EKS Cluster IAM Role**
-
-   <p align="center">
-  <img src="./Project documentation/ekscluster_role.png" width="600" title="ekscluster_role" alt="ekscluster_role">
-  </p>
-
-   - Please attach `AmazonEKS_CNI_Policy` explicitly if it is not attached by default
-
-3. **Create Node Role - AmazonEKSNodeRole**
-4. 
-   - Your AmazonEKSNodeRole will look like this: 
-
-<p align="center">
-  <img src="./Project documentation/node_iam.png" width="600" title="Node_IAM" alt="Node_IAM">
-  </p>
-
-4. **Open EKS Dashboard:**
-   - Navigate to the Amazon EKS service from the AWS Console dashboard.
-
-5. **Create EKS Cluster:**
-   - Click "Create cluster."
-   - Choose a name for your cluster.
-   - Configure networking settings (VPC, subnets).
-   - Choose the `eksCluster` IAM role that was created above
-   - Review and create the cluster.
-
-#### Node Group Creation
-
-Add Nodes as per needed (recommended one c7i-flex.large). Added the SG stated below  
-
-#### Adding inbound rules in Security Group of Nodes
 
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
