@@ -162,10 +162,9 @@ This pipeline automates the complete workflow of the Video-to-Audio Converter ap
 
 ***This pipeline validates the complete application flow by automating authentication, video upload, asynchronous conversion, email notification, and MP3 download, ensuring that all microservices work together successfully.***
 
-**We can Upload mp4 directly on Github and Run the pipeline again.
-Or We can add from Windows. Run this on Windows CLI
+**We can Download mp3 directly from Ubuntu Machine to our windows. Run this on Windows CLI
 ```
-scp -i "C:/Users/Viresh/Downloads/yourkey.pem" "D:/Files from ec2/install.sh" ubuntu@’ip-address’:/home/ubuntu/
+scp -i "C:/Users/Viresh/Downloads/yourkey.pem" ubuntu@’ip-address’:/home/ubuntu/install.sh "D:/Files from ec2"
 ```
 
 ## Destroying the Infrastructure
