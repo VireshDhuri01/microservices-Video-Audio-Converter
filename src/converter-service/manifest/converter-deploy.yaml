@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: converter
-          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/converterservice:4
+          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/:2
           envFrom:
             - configMapRef:
                 name: converter-configmap
