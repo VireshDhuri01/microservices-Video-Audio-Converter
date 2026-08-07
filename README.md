@@ -82,7 +82,7 @@ This pipeline automates the deployment of the application's backend infrastructu
 - Deploys PostgreSQL using Helm.
 - Copies the init.sql file into the PostgreSQL pod.
 - Initializes the PostgreSQL database by executing the SQL script.
-- Deploys RabbitMQ using Helm.
+- Deploys RabbitMQ using Helm. Username and Password is 'guest'
 
 Try to Connect to the MongoDB, Postgres instance using:
 
