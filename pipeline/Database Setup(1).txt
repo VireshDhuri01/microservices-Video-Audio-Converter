@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment{
-        CLUSTER_NAME = "microservices"
+        CLUSTER_NAME = "micro"
         AWS_REGION = "us-east-1"
     }
     stages {
