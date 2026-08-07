@@ -173,6 +173,12 @@ For configuring email notifications and two-factor authentication (2FA), follow 
 
 This pipeline automates the complete workflow of the Video-to-Audio Converter application by interacting with its REST APIs.
 
+Parameters:
+- AWS_ACCOUNT_ID
+- VIDEO_NAME 
+- AUDIO_NAME (any name)
+- NODE_IP (any worker node IP, make sure all necessary ports are open to all nodes)
+
 **Pipeline Flow:**
 
 - Cleans the Jenkins workspace.
