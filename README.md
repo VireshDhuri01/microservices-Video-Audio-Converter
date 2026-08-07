@@ -49,7 +49,7 @@ Follow these steps to deploy your microservice application:
    ```
 3. Just to verify the cluster further for debugging and troubleshooting. Rest of the main flow will be handled by Jenkins Pipeline.
 
-### Argo CD Setup - Check pipeline folder
+### Argo CD Setup - Check installations folder
 
 ### Jenkins Setup
 
