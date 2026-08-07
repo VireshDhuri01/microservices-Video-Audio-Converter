@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/notificationservice:3
+          image: 706162601257.dkr.ecr.us-east-1.amazonaws.com/converterservice:4
           envFrom:
             - configMapRef:
                 name: gateway-configmap
