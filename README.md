@@ -1,4 +1,4 @@
-# Devops Project: video-converter
+# Video-Audio Converter
 Converting mp4 videos to mp3 in a microservices architecture.
 
 ## Architecture
