@@ -157,6 +157,18 @@ For configuring email notifications and two-factor authentication (2FA), follow 
 
 8. Paste this generated password in `notification-service/manifest/secret.yaml` along with your email.
 
+### Argo CD Application Setup
+
+***All 4 Apps***
+<p align="center">
+  <img src="./Project documentation/Argocd_apps.png" width="900" title="Architecture" alt="Architecture">
+  </p>
+
+***Converter App***
+<p align="center">
+  <img src="./Project documentation/converter_app.png" width="900" title="Architecture" alt="Architecture">
+  </p>
+
 ### 🪈Pipeline 3 - Final Convert
 
 This pipeline automates the complete workflow of the Video-to-Audio Converter application by interacting with its REST APIs.
@@ -172,7 +184,7 @@ This pipeline automates the complete workflow of the Video-to-Audio Converter ap
 - Pauses the pipeline and prompts the user to enter the generated F-ID received via email.
 - Downloads the converted MP3 file using the Download API and the provided F-ID.
 
-***This pipeline validates the complete application flow by automating authentication, video upload, asynchronous conversion, email notification, and MP3 download, ensuring that all microservices work together successfully.***
+***This pipeline validates the complete application flow by automating authentication, video upload, asynchronous conversion, email notification, and MP3 download, ensuring that all microservices work together successfully. Pipeline will pause at a stage, check email for the FID. Enter FID and continue to convert***
 
 
 ***Pipeline 3***
