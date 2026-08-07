@@ -36,7 +36,7 @@ Follow these steps to deploy your microservice application:
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
 <p align="center">
-  <img src="./Project documentation/inbound_rules_sg_.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
+  <img src="./Project documentation/security_groups.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
   </p>
 
 #### Deploying your application on EKS Cluster
@@ -104,7 +104,7 @@ kubectl get all
 
 ***Pipeline 1***
 <p align="center">
-  <img src="./Project documentation/Pipeline.png" width="900" title="Architecture" alt="Architecture">
+  <img src="./Project documentation/Pipeline1.png" width="900" title="Architecture" alt="Architecture">
   </p>
   
 
