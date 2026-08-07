@@ -102,6 +102,12 @@ kubectl get all
 
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
+***Pipeline 1***
+<p align="center">
+  <img src="./Project documentation/Pipeline.png" width="900" title="Architecture" alt="Architecture">
+  </p>
+  
+
 ### 🪈Pipeline 2 – Image Creation and Kubernetes Deploy
 
 This pipeline automates the build, containerization, and deployment of all application microservices using Docker, Amazon ECR, GitHub, and Argo CD.
