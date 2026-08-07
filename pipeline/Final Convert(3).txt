@@ -1,7 +1,7 @@
 pipeline{
     agent any
     environment{
-        CLUSTER_NAME = "microservices"
+        CLUSTER_NAME = "micro"
         AWS_REGION = "us-east-1"
     }
     stages{
@@ -54,7 +54,7 @@ pipeline{
                 dir ('assets'){
                     sh """
                     TOKEN=\$(cat token.txt)
-                    curl -X POST -F "file=@./${params.VIDEO_NAME}" -H "Authorization: Bearer \$TOKEN" http://\$NODE_IP:30002/upload
+                    curl -X POST -F "file=@./${params.VIDEO_NAME}" -H "Authorization: Bearer \$TOKEN" http://${params.NODE_IP}:30002/upload
                     
                     echo "Waiting for conversion..."
                     sleep 20
@@ -80,7 +80,7 @@ pipeline{
                     sh """
                     TOKEN=\$(cat token.txt)
 
-                    curl --output ${params.AUDIO_NAME}.mp3 -X GET -H "Authorization: Bearer \$TOKEN" "http://\$NODE_IP:30002/download?fid=$FID"
+                    curl --output ${params.AUDIO_NAME}.mp3 -X GET -H "Authorization: Bearer \$TOKEN" "http://${params.NODE_IP}:30002/download?fid=$FID"
                     """
                 } 
             }
