@@ -66,7 +66,7 @@ Follow these steps to deploy your microservice application:
 
 Once Done with these. Run the Pipelines. 
 
-### Pipeline 1 - Database Setup
+### 🪈Pipeline 1 - Database Setup
 
 To install MongoDB, set the database username and password in `values.yaml`, then navigate to the MongoDB Helm chart folder and run:
 
@@ -102,7 +102,7 @@ kubectl get all
 
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
-### Pipeline 2 – Image Creation and Kubernetes Deploy
+### 🪈Pipeline 2 – Image Creation and Kubernetes Deploy
 
 This pipeline automates the build, containerization, and deployment of all application microservices using Docker, Amazon ECR, GitHub, and Argo CD.
 
@@ -145,7 +145,7 @@ For configuring email notifications and two-factor authentication (2FA), follow 
 
 8. Paste this generated password in `notification-service/manifest/secret.yaml` along with your email.
 
-### Pipeline 3 - Final Convert
+### 🪈Pipeline 3 - Final Convert
 
 This pipeline automates the complete workflow of the Video-to-Audio Converter application by interacting with its REST APIs.
 
