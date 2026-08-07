@@ -1,0 +1,10 @@
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+sudo systemctl status docker
+
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+sudo systemctl status jenkins
+groups jenkins
+
+
