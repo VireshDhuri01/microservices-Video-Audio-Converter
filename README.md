@@ -192,7 +192,7 @@ This pipeline automates the complete workflow of the Video-to-Audio Converter ap
   <img src="./Project documentation/Pipeline3.png" width="900" title="Architecture" alt="Architecture">
   </p>
 
-**We can Download mp3 directly from Ubuntu Machine to our windows. Run this on Windows CLI**
+***We can Download mp3 directly from Ubuntu Machine to our windows. Run this on Windows CLI***
 ```
 scp -i "C:/Users/Viresh/Downloads/yourkey.pem" ubuntu@’ip-address’:/home/ubuntu/install.sh "D:/Files from ec2"
 ```
