@@ -36,7 +36,7 @@ Follow these steps to deploy your microservice application:
 **NOTE:** Ensure that all the necessary ports are open in the node security group.
 
 <p align="center">
-  <img src="./Project documentation/security_groups.png" width="600" title="Inbound_rules_sg" alt="Inbound_rules_sg">
+  <img src="./Project documentation/security_groups.png" width="900" title="Inbound_rules_sg" alt="Inbound_rules_sg">
   </p>
 
 #### Deploying your application on EKS Cluster
@@ -130,6 +130,12 @@ This pipeline automates the build, containerization, and deployment of all appli
 
 ***Once the updated manifests are pushed, Argo CD automatically detects the changes, synchronizes the Kubernetes cluster, and deploys the latest application version to Amazon EKS.***
 
+***Pipeline 2***
+<p align="center">
+  <img src="./Project documentation/Pipeline2.png" width="900" title="Architecture" alt="Architecture">
+  </p>
+  
+
 ### Notification Configuration
 
 
@@ -167,6 +173,12 @@ This pipeline automates the complete workflow of the Video-to-Audio Converter ap
 - Downloads the converted MP3 file using the Download API and the provided F-ID.
 
 ***This pipeline validates the complete application flow by automating authentication, video upload, asynchronous conversion, email notification, and MP3 download, ensuring that all microservices work together successfully.***
+
+
+***Pipeline 3***
+<p align="center">
+  <img src="./Project documentation/Pipeline3.png" width="900" title="Architecture" alt="Architecture">
+  </p>
 
 **We can Download mp3 directly from Ubuntu Machine to our windows. Run this on Windows CLI
 ```
