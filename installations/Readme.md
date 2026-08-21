@@ -10,7 +10,7 @@ helm install argocd argo-cd/argo-cd --namespace argocd --set server.service.type
 
 Also check on CLI - Make sure Argo pods are running
 ```
-kubectl get pods -n argo cd
+kubectl get pods -n argocd
 ```
 If Argo CD application fails. Check Argocd Pods and services are running safely.  
 
