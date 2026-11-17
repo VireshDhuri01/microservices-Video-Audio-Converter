@@ -1,11 +1,16 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.10-slim-bookworm
 
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests build-essential libpq-dev python3-dev && pip install --no-cache-dir --upgrade pip
+RUN apt-get update && 
+    apt-get install -y --no-install-recommends build-essential libpq-dev python3-dev && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir --upgrade pip
 
 WORKDIR /app
-COPY ./requirements.txt /app
 
-RUN pip install --no-cache-dir --requirement /app/requirements.txt
+COPY requirements.txt /app/
+
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 COPY . /app
 
 EXPOSE 5000
