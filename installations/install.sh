@@ -36,7 +36,7 @@ chmod +x kubectl
 mkdir -p ~/.local/bin
 mv ./kubectl ~/.local/bin/kubectl
 
-#install java
+#install jenkins
 sudo apt update
 sudo apt install openjdk-21-jre -y
 java --version
