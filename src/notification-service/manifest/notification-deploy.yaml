@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: notification
-          image: 683768264737.dkr.ecr.us-east-1.amazonaws.com/notificationservice:6
+          image: 683768264737.dkr.ecr.us-east-1.amazonaws.com/notificationservice:1
           envFrom:
             - configMapRef:
                 name: notification-configmap
